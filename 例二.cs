@@ -263,7 +263,7 @@ namespace Xamarin_IPE_IOS
 			}
 			else
 			{
-				//第一件事: 先做換背景圖 ,順便判斷如果已經按過就returnd不做事
+				//第一件事: 先做換背景圖 ,順便判斷如果已經按過就returnd不做事.
                 if(((UIButton)sender).RestorationIdentifier == "btnSetting")
                 {   
                     if(StateMachine.IsActivted)
