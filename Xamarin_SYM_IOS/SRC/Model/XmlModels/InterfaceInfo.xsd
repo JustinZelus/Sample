@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+The xml schema for Sym Project By K.C. 2018/09/10 Mon.
+Update - 2019/01/17 Thur
+1. InterfaceInfo Add databaseVersion attribute.
+
+Update - 2018/12/13 Thur
+1. Modify the displayOrder attribute default value to 65535 of the LvData Element.
+2. Modify the displayOrder attribute default type to uint of the LvData Element.
+
+Update - 2018/012/06 Thur
+1. LvData Element Add new attribute displayOrder
+
+Update - 2018/09/13 Thur
+1. Update Format
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="VehicleInfo">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ECUs" minOccurs="0"/>
+			</xs:sequence>
+			<xs:attribute name="vin" type="xs:string" use="optional"/>
+			<xs:attribute name="vehicleName" type="xs:string" use="optional"/>
+			<xs:attribute name="vehicleId" type="xs:int" use="required"/>
+			<xs:attribute name="picture" type="xs:string" use="optional"/>
+			<xs:attribute name="modCode" type="xs:string" use="required"/>
+			<xs:attribute name="diagTimestamp" type="xs:long" use="required"/>
+			<xs:attribute name="brand" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="LvDatas">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="LvData" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="LvData">
+		<xs:complexType>
+			<xs:attribute name="id" type="xs:short" use="required"/>
+			<xs:attribute name="value" type="xs:float" use="required"/>
+			<xs:attribute name="displayOrder" type="xs:unsignedInt" use="optional" default="65535"/>
+			<xs:attribute name="diagTimestamp" type="xs:long" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="InterfaceInfo">
+		<xs:complexType>
+			<xs:all>
+				<xs:element ref="VehicleInfo"/>
+			</xs:all>
+			<xs:attribute name="softwareVersion" type="xs:string" use="required"/>
+			<xs:attribute name="serialNumber" type="xs:string" use="required"/>
+			<xs:attribute name="firmwareVersion" type="xs:string" use="required"/>
+			<xs:attribute name="databaseVersion" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="FreezeDatas">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="FreezeData" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="FreezeData">
+		<xs:complexType>
+			<xs:attribute name="id" type="xs:short" use="required"/>
+			<xs:attribute name="value" type="xs:float" use="required"/>
+			<xs:attribute name="hexCode" type="xs:string" use="required"/>
+			<xs:attribute name="diagTimestamp" type="xs:long" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ECUs">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ECU" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ECU">
+		<xs:complexType>
+			<xs:all>
+				<xs:element ref="LvDatas" minOccurs="0"/>
+				<xs:element ref="DTCodes" minOccurs="0"/>
+				<xs:element ref="FreezeDatas" minOccurs="0"/>
+			</xs:all>
+			<xs:attribute name="id" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DTCodes">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="DTCode" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DTCode">
+		<xs:complexType>
+			<xs:attribute name="hexCode" type="xs:string" use="required"/>
+			<xs:attribute name="diagTimestamp" type="xs:long" use="required"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

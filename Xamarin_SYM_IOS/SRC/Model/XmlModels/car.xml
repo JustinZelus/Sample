@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<root>
+	<CarInfo uuid="xxxx-xxxx-xxxx-xxxx" timestamp="2018/08/31 05:30">
+		<Lat>23.4</Lat>
+		<Lng>106.4</Lng>
+		<Propertys>
+			<LV_ID>706</LV_ID>
+			<LV_Value>1694</LV_Value>
+		</Propertys>
+		<Propertys>
+			<LV_ID>706</LV_ID>
+			<LV_Value>1694</LV_Value>
+		</Propertys>
+	</CarInfo>
+	<CarInfo uuid="2" timestamp="2018/08/31 05:30">
+		<Propertys>
+			<LV_ID>706</LV_ID>
+			<LV_Value>1694</LV_Value>
+		</Propertys>
+		<Propertys>
+			<LV_ID>706</LV_ID>
+			<LV_Value>1694</LV_Value>
+		</Propertys>
+	</CarInfo>
+</root>
+
