@@ -1,0 +1,143 @@
+/// Copyright (c) 2018 Razeware LLC
+/// 
+/// Permission is hereby granted, free of charge, to any person obtaining a copy
+/// of this software and associated documentation files (the "Software"), to deal
+/// in the Software without restriction, including without limitation the rights
+/// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+/// copies of the Software, and to permit persons to whom the Software is
+/// furnished to do so, subject to the following conditions:
+/// 
+/// The above copyright notice and this permission notice shall be included in
+/// all copies or substantial portions of the Software.
+/// 
+/// Notwithstanding the foregoing, you may not use, copy, modify, merge, publish,
+/// distribute, sublicense, create a derivative work, and/or sell copies of the
+/// Software in any work that is designed, intended, or marketed for pedagogical or
+/// instructional purposes related to programming, coding, application development,
+/// or information technology.  Permission for such use, copying, modification,
+/// merger, publication, distribution, sublicensing, creation of derivative works,
+/// or sale is expressly withheld.
+/// 
+/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+/// THE SOFTWARE.
+
+import UIKit
+
+class ModeratorsListViewController: UIViewController, AlertDisplayer {
+  private enum CellIdentifiers {
+    static let list = "List"
+  }
+  
+  @IBOutlet var indicatorView: UIActivityIndicatorView!
+  @IBOutlet var tableView: UITableView!
+  
+  var site: String!
+  
+  //我的viewModel，controller會跟它溝通
+  private var viewModel: ModeratorsViewModel!
+  
+  private var shouldShowLoadingCell = false
+  
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    
+    indicatorView.color = ColorPalette.RWGreen
+    indicatorView.startAnimating()
+    
+    tableView.isHidden = true
+    tableView.separatorColor = ColorPalette.RWGreen
+    tableView.dataSource = self
+    tableView.delegate = self
+    tableView.prefetchDataSource = self
+    
+    let request = ModeratorRequest.from(site: site)
+    viewModel = ModeratorsViewModel(request: request, delegate: self)
+    
+    viewModel.fetchModerators()    
+  }
+}
+
+extension ModeratorsListViewController: UITableViewDataSource,UITableViewDelegate {
+  func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+      cell.backgroundColor = UIColor.orange;
+  }
+  
+  func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    // 1
+    print("totalCount:  " + String(viewModel.totalCount))
+    return viewModel.totalCount
+    
+  }
+  
+  func numberOfSections(in tableView: UITableView) -> Int {
+      return 1
+  }
+  
+  func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    let cell = tableView.dequeueReusableCell(withIdentifier: CellIdentifiers.list, for: indexPath) as! ModeratorTableViewCell
+    // 2
+    if isLoadingCell(for: indexPath) {
+      cell.configure(with: .none)
+    } else {
+      //view與Controller均不能直接引用model,而是通過引用viewModel來間接引用model
+      //cell是我的view，然後透過configure方法跟viewModel邦定
+      cell.configure(with: viewModel.moderator(at: indexPath.row))
+    }
+    return cell
+  }
+}
+
+extension ModeratorsListViewController: UITableViewDataSourcePrefetching {
+  func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
+    
+    if indexPaths.contains(where: isLoadingCell) {
+      viewModel.fetchModerators()
+    }
+  }
+}
+
+private extension ModeratorsListViewController {
+  func isLoadingCell(for indexPath: IndexPath) -> Bool {
+    print("indexPath.row :      " + String(indexPath.row))
+    
+    return indexPath.row >= viewModel.currentCount
+  }
+  
+  func visibleIndexPathsToReload(intersecting indexPaths: [IndexPath]) -> [IndexPath] {
+    let indexPathsForVisibleRows = tableView.indexPathsForVisibleRows ?? []
+    let indexPathsIntersection = Set(indexPathsForVisibleRows).intersection(indexPaths)
+    return Array(indexPathsIntersection)
+  }
+}
+
+
+extension ModeratorsListViewController: ModeratorsViewModelDelegate {
+  func onFetchCompleted(with newIndexPathsToReload: [IndexPath]?) {
+    // 1
+    guard let newIndexPathsToReload = newIndexPathsToReload else {
+      indicatorView.stopAnimating()
+      tableView.isHidden = false
+      tableView.reloadData()
+      return
+    }
+    // 2
+    let indexPathsToReload = visibleIndexPathsToReload(intersecting: newIndexPathsToReload)
+    
+    
+    tableView.reloadRows(at: indexPathsToReload, with: .automatic)
+  }
+  
+  func onFetchFailed(with reason: String) {
+    indicatorView.stopAnimating()
+    
+    let title = "Warning".localizedString
+    let action = UIAlertAction(title: "OK".localizedString, style: .default)
+    displayAlert(with: title , message: reason, actions: [action])
+  }
+}
+
