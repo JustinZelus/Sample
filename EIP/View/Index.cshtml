@@ -1,0 +1,195 @@
+﻿@model EIP.Controllers.MyInfoIndexViewModel //資料跟view綁定
+@using PagedList
+@using PagedList.Mvc
+
+@section TopButtons {
+    <li>
+        <a class="btn is-success font font-add" onclick="PushNotification()" >~%1132%~推播%%</a>
+    </li>
+}
+
+    <script>
+
+    $(function () {
+        $('#chkSelectAll').change(function () {
+            if ($(this).prop('checked'))
+                $('.chkSend').prop('checked', true);
+            else
+                $('.chkSend').prop('checked', false);
+        });
+
+    })
+    function PushNotification() {
+
+        var s = '';
+        s += '<div class="g frame-with-btn"><form id="PushForm">';
+        s += '  <div class="md frame-table">';
+        s += '    <table>';
+        s += '      <tbody>';
+        //s += '        <tr>';
+        //s += '          <th>';
+        //s += '            <label for="">目標</label>';
+        //s += '          </th>';
+        //s += '          <td></td>';
+        //s += '        </tr>';
+        s += '        <tr>';
+        s += '          <th style="width:120px">';
+        s += '            <label class="is-require">~%88%~標題%%</label>';
+        s += '          </th>';
+        s += '          <td>';
+        s += '            <input id="Title" name="Title" style="width:100%" type="text" value="">';
+        s += '        </tr>';
+        //s += '        <tr>';
+        //s += '          <th style="width:120px">';
+        //s += '            <label class="is-require">次標題</label>';
+        //s += '          </th>';
+        //s += '          <td>';
+        //s += '            <input id="SubTitle" name="SubTitle" style="width:100%" type="text" value="">';
+        //s += '        </tr>';
+        s += '        <tr>';
+        s += '          <th style="width:120px">';
+        s += '            <label class="is-require">~%415%~內容%%</label>';
+        s += '          </th>';
+        s += '          <td>';
+        s += '            <textarea rows="4" id="Body" name="Body" style="margin: 0px; width: 514px; height: 80px;"></textarea>';
+        s += '          </td>';
+        s += '        </tr>';
+        s += '      </tbody>';
+        s += '    </table>';
+        s += '  </div></form>';
+        s += '</div>';
+
+        $popuper.addCt({
+            width: '',
+            height: '',
+            headingText: '~%1132%~推播%%',
+            contentType: 'html',
+            contentData: s,
+            btns: [
+                {
+                    class: ['is-premary'],
+                    type: 'button',
+                    href: '#',
+                    text: '~%254%~確定%%',
+                    action: function () {
+                        var PushList = [];
+                        $('.chkSend:checked').each(function (k, v) {
+                            var PushData = $(v).data('PushData');
+                            PushList.push(PushData);
+                        })
+                        console.log(PushList);
+                        var ListMyInfoSN = $.map(PushList, function (item, index) {
+                            return item.SN;
+                        })
+                        var PushForm = $('#PushForm').serializeObject();
+                        PushForm.ListMyInfoSN = ListMyInfoSN;
+                        console.log(PushForm);
+                        $.post('/MyInfo/PushNotification', PushForm);
+                    }
+                },
+            ]
+        });
+    }
+    </script>
+
+
+<div class="g fieldset">
+    @using (Html.BeginForm())
+    {
+        <div class="input text is-square">
+            <label>~%214%~姓名%%：</label>
+            @Html.TextBox("Q_Name", null, new { @placeholder = "~%274%~請輸入姓名%%" })
+        </div>
+        <button type="submit" name="Btn" id="EIPSeachBtn" value="Search" class="is-info font font-search">~%275%~查詢%%</button>
+    }
+</div>
+
+
+<div class="md main-table rwd">
+    <table>
+        <tbody>
+            <tr>
+                <th>
+                    <div class="input checkbox">
+                        <input type="checkbox" id="chkSelectAll" />
+                        <label for="chkSelectAll">~%1133%~全選%%</label>
+                    </div>
+                </th>
+                <th class="is-func">
+                    ~%276%~功能%%
+                </th>
+
+                <th class="is-changed">
+                    @Html.DisplayNameFor(model => model.ListData[0].UserName)
+                </th>
+
+                <th class="is-func">
+                    FB
+                </th>
+
+            </tr>
+			//將資料拿出來用
+            @foreach (var item in Model.ListData) 
+            {    
+                <tr>
+                    <td data-title=" " style="width: 50px;">
+                        <div class="input checkbox">
+                            <input type="checkbox" id="chkSelect_@item.SN" class="chkSend"  />
+                            <label for="chkSelect_@item.SN">~%1132%~推播%%</label>
+                        </div>
+                        <script>
+                            $(function () {
+                                $('#chkSelect_@item.SN').data('PushData',@Html.Raw(Json.Encode(new { UserName = item.UserName, SN = item.SN, App_Token = item.App_Token })));
+                            })
+                        </script>
+                    </td>
+                    <td class="is-func">
+                        <div class="in">
+                            <input class="is-edit" type="button" value="~%277%~編輯%%" title="~%277%~編輯%%" 
+                                   EIP-OpenDialog="@Url.Action("Edit",new { NodeSN = ViewBag.NodeSN, SN = item.SN})" 
+                                   EIP-OpenDialog-title= "~%23%~修改資料%%" >
+                            
+
+                            @using (Html.BeginForm("Delete", "MyInfo", new { NodeSN = ViewBag.NodeSN, SN = item.SN }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <input class="is-remove" type="submit" value="~%278%~刪除%%" title="~%278%~刪除%%"
+                                       EIP-Delete='{title:"~%25%~刪除資料%%", content:"~%279%~是否要刪除資料%%(@item.UserName)"}' />
+                            }
+
+                            <div class="input">
+                                <input class="is-more" type="button" value="~%280%~更多%%"> 
+                                <div class="extend">
+                                    <input type="button" value="~%1134%~推播紀錄%%" title="~%1134%~推播紀錄%%"  
+                                           EIP-OpenDialog="@Url.Action("MyInfoNotificationIndex",new { NodeSN = ViewBag.NodeSN, MyInfoSN = item.SN })" EIP-OpenDialog-title= "~%1134%~推播紀錄%%">
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td class="is-left">
+                        <div class="in">
+                            @Html.DisplayFor(modelItem => item.UserName)
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="in">
+                            @Html.Raw(@item.StatusString)
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Footer {
+    @Html.JPagedListPager(Model.ListData as IPagedList,
+                        (p) => Url.Action("Index", new
+                        {
+                            pageNo = p,
+                            Q_Name = Model.Q_Name
+                        }
+                    ))
+}
